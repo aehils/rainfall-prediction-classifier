@@ -73,7 +73,26 @@ def main():
         ('cat', cat_transformer, categorical_features)
     ])      # combines numerical/categorical transformers into one transformation
 
-    
+    primary_pipeline = Pipeline([
+        ('preprocessing', preprocessor),
+        ('classifier', RandomForestClassifier(random_state=42))
+    ])
+
+    param_grid = {
+        'classifier__n_estimators' : [50, 100],
+        'classifier__max_depth' : [None, 10, 20],
+        'classifer__min_samples_split' : [2, 5]
+    }       # parameter grid for RandomForest classifier
+
+    cross_val = StratifiedKFold(n_splits=5, shuffle=True)      # define cross validation method
+    model = GridSearchCV(estimator=primary_pipeline,
+                         param_grid=param_grid,
+                         scoring='accuracy',
+                         cv=cross_val, verbose=2)       # grid search on param grid
+    model.fit(X_train, y_train)     # fit (read train) model pipeline on training data
+
+
+
 
 
 if __name__ == '__main__':
