@@ -85,9 +85,9 @@ def main():
     }       # parameter grid for RandomForest classifier
     param_grid_lr = {
         'classifier__solver' : ['liblinear'],
-        'classifier__penalty': ['l1', 'l2'],
+        'classifier__l1_ratio': [1, 0],
         'classifier__class_weight' : [None, 'balanced']
-    }       # parameter grid from LinearRegression model
+    }       # parameter grid from LogisticRegression model
 
     cross_val = StratifiedKFold(n_splits=5, shuffle=True)      # define cross validation method
     model = GridSearchCV(estimator=primary_pipeline,
@@ -135,17 +135,18 @@ def main():
     # plt.show()
 
     # REPLACING RANDOMFOREST WITH LINEARREGRESSION
-    model.set_params(classifier=LogisticRegression(random_state=42))
     model.estimator = primary_pipeline  # update estimator with new algo
     model.param_grid = param_grid_lr    # update with new param grid
+    primary_pipeline.set_params(classifier=LogisticRegression(random_state=42))
+
 
     model.fit(X_train, y_train)     # fit new model to training data
     y_hat = model.predict(X_test)   # make predictions
 
     # COMPARE with previous model
-    print(classification_report(y_test, y_pred))
+    print(classification_report(y_test, y_hat))
     # Generate the confusion matrix 
-    conf_matrix = confusion_matrix(y_test, y_pred)
+    conf_matrix = confusion_matrix(y_test, y_hat)
     plt.figure()
     sns.heatmap(conf_matrix, annot=True, cmap='Blues', fmt='d')
     # Set the title and labels
@@ -155,8 +156,6 @@ def main():
     # Show the plot
     plt.tight_layout()
     plt.show()      
-
-
 
 if __name__ == '__main__':
     main()
