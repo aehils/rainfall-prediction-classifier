@@ -73,7 +73,7 @@ def main():
         ('cat', cat_transformer, categorical_features)
     ])      # combines numerical/categorical transformers into one transformation
 
-    primary_pipeline = Pipeline([
+    primary_pipeline = Pipeline(steps=[
         ('preprocessing', preprocessor),
         ('classifier', RandomForestClassifier(random_state=42))
     ])
@@ -81,7 +81,7 @@ def main():
     param_grid = {
         'classifier__n_estimators' : [50, 100],
         'classifier__max_depth' : [None, 10, 20],
-        'classifer__min_samples_split' : [2, 5]
+        'classifier__min_samples_split' : [2, 5]
     }       # parameter grid for RandomForest classifier
 
     cross_val = StratifiedKFold(n_splits=5, shuffle=True)      # define cross validation method
@@ -90,7 +90,23 @@ def main():
                          scoring='accuracy',
                          cv=cross_val, verbose=2)       # grid search on param grid
     model.fit(X_train, y_train)     # fit (read train) model pipeline on training data
+    print("\nBest parameters found: ", model.best_params_)
+    print("Best cross-validation score: {:.2f}".format(model.best_score_))   
 
+    test_score = model.score(X_test, y_test)
+    print("Test set score: {:.2f}".format(test_score))
+    print("\nClassification Report:")
+
+    # get model pipeline predictions on unseen data
+    y_pred = model.predict(X_test)
+    print(classification_report(y_test, y_pred))
+
+    # plot a confusion matrix for RF classifier
+    confu_matrix = confusion_matrix(y_test, y_pred)
+    disp = ConfusionMatrixDisplay(confusion_matrix=confu_matrix)
+    disp.plot(cmap='Blues')
+    plt.title('RF Classifier Confusion Matrix')
+    plt.show()
 
 
 
