@@ -83,6 +83,11 @@ def main():
         'classifier__max_depth' : [None, 10, 20],
         'classifier__min_samples_split' : [2, 5]
     }       # parameter grid for RandomForest classifier
+    param_grid_lr = {
+        'classifier__solver' : ['liblinear'],
+        'classifier__penalty': ['l1', 'l2'],
+        'classifier__class_weight' : [None, 'balanced']
+    }       # parameter grid from LinearRegression model
 
     cross_val = StratifiedKFold(n_splits=5, shuffle=True)      # define cross validation method
     model = GridSearchCV(estimator=primary_pipeline,
@@ -110,7 +115,7 @@ def main():
 
     # get feature importances for the classifier
     cat_feature_names = list(model.best_estimator_.named_steps['preprocessing']
-                             .named_transformers['cat'].named_steps['encoder']
+                             .named_transformers_['cat'].named_steps['encoder']
                              .get_feature_names_out(categorical_features))  # first get the encoded categorical feature names
     all_feature_names = numerical_features + cat_feature_names
     feature_importances = model.best_estimator_.named_steps['classifier'].feature_importances_
@@ -119,15 +124,38 @@ def main():
         'Importance' : feature_importances
     }).sort_values(by='Importance', ascending=False)
 
-    N = 20  # Change this number to display more or fewer features
+    N = 20  # number of features to display in plot
     top_features = importance_df.head(N)
     # Plotting
-    plt.figure(figsize=(10, 6))
-    plt.barh(top_features['Feature'], top_features['Importance'], color='skyblue')
-    plt.gca().invert_yaxis()  # Invert y-axis to show the most important feature on top
-    plt.title(f'Top {N} Most Important Features in predicting whether it will rain today')
-    plt.xlabel('Importance Score')
-    plt.show()  
+    # plt.figure(figsize=(10, 6))
+    # plt.barh(top_features['Feature'], top_features['Importance'], color='skyblue')
+    # plt.gca().invert_yaxis()  # invert y-axis to show the most important feature on top
+    # plt.title(f'Top {N} Most Important Features in predicting whether it will rain today')
+    # plt.xlabel('Importance Score')
+    # plt.show()
+
+    # REPLACING RANDOMFOREST WITH LINEARREGRESSION
+    model.set_params(classifier=LinearRegression(random_state=42))
+    model.estimator = primary_pipeline  # update estimator with new algo
+    model.param_grid = param_grid_lr    # update with new param grid
+
+    model.fit(X_train, y_train)     # fit new model to training data
+    y_hat = model.predict(X_test)   # make predictions
+
+    # COMPARE with previous model
+    print(classification_report(y_test, y_pred))
+    # Generate the confusion matrix 
+    conf_matrix = confusion_matrix(y_test, y_pred)
+    plt.figure()
+    sns.heatmap(conf_matrix, annot=True, cmap='Blues', fmt='d')
+    # Set the title and labels
+    plt.title('Titanic Classification Confusion Matrix')
+    plt.xlabel('Predicted')
+    plt.ylabel('Actual')
+    # Show the plot
+    plt.tight_layout()
+    plt.show()      
+
 
 
 if __name__ == '__main__':
