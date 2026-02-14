@@ -99,7 +99,7 @@ def main():
     print("Best cross-validation score: {:.2f}".format(model.best_score_))   
 
     test_score = model.score(X_test, y_test)
-    print("Test set score: {:.2f}".format(test_score))
+    print(f"Test set score: {test_score:.2%}")
     print("\nClassification Report:")
 
     # get model pipeline predictions on unseen data
@@ -142,9 +142,11 @@ def main():
 
     model.fit(X_train, y_train)     # fit new model to training data
     y_hat = model.predict(X_test)   # make predictions
-
+    
     # COMPARE with previous model
     print(classification_report(y_test, y_hat))
+    test_score = model.score(X_test, y_test)
+    print(f"\nTest set accuracy: {test_score:.2%}")
     # Generate the confusion matrix 
     conf_matrix = confusion_matrix(y_test, y_hat)
     plt.figure()
