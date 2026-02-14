@@ -102,13 +102,32 @@ def main():
     print(classification_report(y_test, y_pred))
 
     # plot a confusion matrix for RF classifier
-    confu_matrix = confusion_matrix(y_test, y_pred)
-    disp = ConfusionMatrixDisplay(confusion_matrix=confu_matrix)
-    disp.plot(cmap='Blues')
-    plt.title('RF Classifier Confusion Matrix')
-    plt.show()
+    # confu_matrix = confusion_matrix(y_test, y_pred)
+    # disp = ConfusionMatrixDisplay(confusion_matrix=confu_matrix)
+    # disp.plot(cmap='Blues')
+    # plt.title('RF Classifier Confusion Matrix')
+    # plt.show()
 
+    # get feature importances for the classifier
+    cat_feature_names = list(model.best_estimator_.named_steps['preprocessing']
+                             .named_transformers['cat'].named_steps['encoder']
+                             .get_feature_names_out(categorical_features))  # first get the encoded categorical feature names
+    all_feature_names = numerical_features + cat_feature_names
+    feature_importances = model.best_estimator_.named_steps['classifier'].feature_importances_
+    importance_df = pd.DataFrame({
+        'Feature' : all_feature_names,
+        'Importance' : feature_importances
+    }).sort_values(by='Importance', ascending=False)
 
+    N = 20  # Change this number to display more or fewer features
+    top_features = importance_df.head(N)
+    # Plotting
+    plt.figure(figsize=(10, 6))
+    plt.barh(top_features['Feature'], top_features['Importance'], color='skyblue')
+    plt.gca().invert_yaxis()  # Invert y-axis to show the most important feature on top
+    plt.title(f'Top {N} Most Important Features in predicting whether it will rain today')
+    plt.xlabel('Importance Score')
+    plt.show()  
 
 
 if __name__ == '__main__':
