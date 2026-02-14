@@ -53,14 +53,25 @@ def main():
 
     # separate target from features
     X = df.drop(columns='RainToday', axis=1)
-    y = df['RainToday']
+    y = df['RainToday']     #  print(y.value_counts())
 
     X_train, X_test, y_train, y_test =  train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
+    
+    numerical_features = X_train.select_dtypes(include=['number']).columns.tolist()
+    categorical_features = X_train.select_dtypes(include=['object', 'category']).columns.tolist()
 
+    # numerical/categorical feature transformers
+    num_transformer = Pipeline(steps=[
+        ('scaler', StandardScaler())
+    ])      # standardise numerical data
+    cat_transformer = Pipeline(steps=[
+        ('encoder', OneHotEncoder(handle_unknown='ignore'))
+    ])      # encode categorical data
 
-    print(y.value_counts())
-
-
+    preprocessor = ColumnTransformer(transformers=[
+        ('num', num_transformer, numerical_features),
+        ('cat', cat_transformer, categorical_features)
+    ])      # combines numerical/categorical transformers into one transformation
 
     
 
