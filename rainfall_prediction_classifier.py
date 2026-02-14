@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 
 from sklearn.pipeline import Pipeline
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import LogisticRegression
 from sklearn.compose import ColumnTransformer
 
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
@@ -135,7 +135,7 @@ def main():
     # plt.show()
 
     # REPLACING RANDOMFOREST WITH LINEARREGRESSION
-    model.set_params(classifier=LinearRegression(random_state=42))
+    model.set_params(classifier=LogisticRegression(random_state=42))
     model.estimator = primary_pipeline  # update estimator with new algo
     model.param_grid = param_grid_lr    # update with new param grid
 
