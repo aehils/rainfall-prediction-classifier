@@ -135,9 +135,9 @@ def main():
     # plt.show()
 
     # REPLACING RANDOMFOREST WITH LINEARREGRESSION
+    primary_pipeline.set_params(classifier=LogisticRegression(random_state=42))
     model.estimator = primary_pipeline  # update estimator with new algo
     model.param_grid = param_grid_lr    # update with new param grid
-    primary_pipeline.set_params(classifier=LogisticRegression(random_state=42))
 
 
     model.fit(X_train, y_train)     # fit new model to training data
